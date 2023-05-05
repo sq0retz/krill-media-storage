@@ -1,4 +1,8 @@
+/*!
+\file
+\brief Файл реализации контроллера базы данных
 
+*/
 #include "databasecontroller.h"
 #include <filesystem>
 #include <QDebug>

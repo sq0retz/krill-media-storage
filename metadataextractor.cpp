@@ -1,4 +1,8 @@
+/*!
+\file
+\brief Файл реализации класса извлечения метаданных
 
+*/
 #include "metadataextractor.h"
 
 #include "qdebug.h"
@@ -153,7 +157,6 @@ void metaDataExtractor::constructTagSelectionDialog()
     dialogCenterLayout->addWidget(mediasList);
     selectionDialog->setModal(true);
     selectionDialog->show();
-
     mediasList->setColumnCount(2);
     mediasList->setColumnHidden(1,true);
     mediasList->verticalHeader()->hide();

@@ -1,4 +1,8 @@
+/*!
+\file
+\brief Файл главного класса
 
+*/
 #include "mainwindow.h"
 
 #include <QApplication>

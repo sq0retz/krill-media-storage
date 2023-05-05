@@ -1,4 +1,8 @@
+/*!
+\file
+\brief Файл реализации главного окна
 
+*/
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
@@ -82,7 +86,9 @@ void MainWindow::constructRightDock()
     QWidget* rightDockWidget = new QWidget;
     QPushButton *addTagButton = new QPushButton;
     QPushButton *resetTagsSelectionButton = new QPushButton;
+    QPushButton *addNewTagButton = new QPushButton;
     QVBoxLayout *rightDockLayout = new QVBoxLayout;
+    QHBoxLayout *comboBoxAddButtonlayout = new QHBoxLayout;
     QLabel * mainText = new QLabel;
     this->addDockWidget(Qt::RightDockWidgetArea,rightDock);
     tagComboBox->setEditable(true);
@@ -91,10 +97,15 @@ void MainWindow::constructRightDock()
     addTagButton->setText("Добавить теги");
     resetTagsSelectionButton->setText("Очистить выборку");
     mainText->setText("Добавление тегов");
+    addNewTagButton->setText("+");
+    addNewTagButton->setFixedHeight(25);
+    addNewTagButton->setFixedWidth(25);
     mainText->setAlignment(Qt::AlignTop);
     mainText->setFixedHeight(15);
+    comboBoxAddButtonlayout->addWidget(tagComboBox);
+    comboBoxAddButtonlayout->addWidget(addNewTagButton);
     rightDockLayout->addWidget(mainText);
-    rightDockLayout->addWidget(tagComboBox);
+    rightDockLayout->addLayout(comboBoxAddButtonlayout);
     rightDockLayout->addWidget(tagSelection);
     rightDockLayout->addWidget(addTagButton);
     rightDockLayout->addWidget(resetTagsSelectionButton);
@@ -103,6 +114,48 @@ void MainWindow::constructRightDock()
     connect(addTagButton, &QPushButton::pressed, this, &MainWindow::addTagButtonPressed);
     connect(tagComboBox, &QComboBox::currentIndexChanged,this, &MainWindow::selectTag);
     connect(resetTagsSelectionButton, &QPushButton::pressed, this, &MainWindow::resetTagSelectionButtonPressed);
+    connect(addNewTagButton, &QPushButton::pressed,this, &MainWindow::addNewTagButtonPressed);
+}
+
+void MainWindow::addNewTagButtonPressed()
+{
+    QDialog *tagAddDialog = new QDialog(this);
+    QLabel *labelTagAdd = new QLabel;
+    QLineEdit *tagLine = new QLineEdit;
+    QPushButton *addNewTagButton = new QPushButton;
+    QPushButton *closeButton = new QPushButton;
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QHBoxLayout *buttonsLayout = new QHBoxLayout;
+
+
+    labelTagAdd->setText("Добавление новых тегов в базу даных");
+    addNewTagButton->setText("Добавить");
+    closeButton->setText("Выйти");
+
+    buttonsLayout->addWidget(addNewTagButton);
+    buttonsLayout->addWidget(closeButton);
+
+    mainLayout->addWidget(labelTagAdd);
+    mainLayout->addWidget(tagLine);
+    mainLayout->addLayout(buttonsLayout);
+
+    tagAddDialog->setLayout(mainLayout);
+    tagAddDialog->setModal(true);
+    tagAddDialog->show();
+
+
+    connect(addNewTagButton, &QPushButton::pressed,[=]() {
+        db->InsertTag(tagLine->text().remove(" "));
+        tagLine->clear();
+    });
+
+    connect(closeButton, &QPushButton::pressed,[=]() {
+        updateTagsCache();
+        updateTagComboBox();
+        tagAddDialog->close();
+    });
+
+
 }
 
 void MainWindow::updateVideoTable()
