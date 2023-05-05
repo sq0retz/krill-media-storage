@@ -1,12 +1,12 @@
 <RCC>
     <qresource prefix="/assets/icons">
-        <file>assets/videoIcon</file>
         <file>assets/mainIcon</file>
-        <file>assets/imageIcon</file>
-        <file>assets/audioIcon</file>
-        <file>assets/updateIcon</file>
-        <file>assets/deleteIcon</file>
-        <file>assets/addFileIcon</file>
+        <file>assets/videoIcon.png</file>
+        <file>assets/audioIcon.png</file>
+        <file>assets/deleteIcon.png</file>
+        <file>assets/updateIcon.png</file>
+        <file>assets/imageIcon.png</file>
+        <file>assets/addFileIcon.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     videoTable = new QTableWidget;
     imageTable = new QTableWidget;
     audioTable = new QTableWidget;
-    this->setWindowIcon(QIcon(":/assets/icons/assets/mainIcon"));
+    //this->setWindowIcon(QIcon(":/assets/icons/assets/mainIcon"));
     this->setWindowTitle("Лучшая прога евер");
     centralWidgetStack->insertWidget(1, videoTable);
     centralWidgetStack->insertWidget(2, imageTable);
@@ -29,22 +29,22 @@ MainWindow::MainWindow(QWidget *parent)
 }
 void MainWindow::constructTopToolBar()
 {
-    QAction *videoAction = new QAction(tr("&НАЖМИ..."), this);
+    QAction *videoAction = new QAction(tr("&нажать..."), this);
     videoAction->setIcon(QIcon(":/assets/icons/assets/videoIcon"));
     videoAction->setShortcuts(QKeySequence::Open);
     videoAction->setStatusTip(tr("Открыть таблицу видео"));
     ui->topToolBar->addAction(videoAction);
-    QAction *imageAction = new QAction(tr("&Open..."), this);
+    QAction *imageAction = new QAction(tr("&нажать..."), this);
     imageAction->setIcon(QIcon(":/assets/icons/assets/imageIcon"));
     imageAction->setShortcuts(QKeySequence::Open);
     imageAction->setStatusTip(tr("Открыть таблицу изображений"));
     ui->topToolBar->addAction(imageAction);
-    QAction *audioAction = new QAction(tr("&Open..."), this);
+    QAction *audioAction = new QAction(tr("&нажать..."), this);
     audioAction->setIcon(QIcon(":/assets/icons/assets/audioIcon"));
     audioAction->setShortcuts(QKeySequence::Open);
     audioAction->setStatusTip(tr("Открыть таблицу аудио"));
     ui->topToolBar->addAction(audioAction);
-    QAction *updateAction = new QAction(tr("&Выпьем..."), this);
+    QAction *updateAction = new QAction(tr("&Обновить..."), this);
     updateAction->setIcon(QIcon(":/assets/icons/assets/updateIcon"));
     updateAction->setShortcuts(QKeySequence::Open);
     updateAction->setStatusTip(tr("Перезагрузить базу данных"));
@@ -67,12 +67,12 @@ void MainWindow::constructTopToolBar()
 
 void MainWindow::constructBottomToolBar()
 {
-   QAction *deleteAction = new QAction(tr("&ПОДУМОЙ..."), this);
+   QAction *deleteAction = new QAction(tr("&Удалить..."), this);
    deleteAction->setIcon(QIcon(":/assets/icons/assets/deleteIcon"));
    deleteAction->setShortcuts(QKeySequence::Open);
    deleteAction->setStatusTip(tr("Удалить файлы"));
    ui->bottomToolBar->addAction(deleteAction);
-   QAction *addFilesAction = new QAction(tr("&НЕ ДУМОЙ..."), this);
+   QAction *addFilesAction = new QAction(tr("&Добавить..."), this);
    addFilesAction->setIcon(QIcon(":/assets/icons/assets/addFileIcon"));
    addFilesAction->setShortcuts(QKeySequence::Open);
    addFilesAction->setStatusTip(tr("Добавить файлы"));
