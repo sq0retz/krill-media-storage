@@ -11,8 +11,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets )
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Multimedia)
-find_package(Qt6 REQUIRED COMPONENTS MultimediaWidgets)
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
@@ -41,7 +39,7 @@ else()
         add_library(krill-media-storage SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
+# Define properties for Android with  Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(krill-media-storage
@@ -55,8 +53,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC MediaInfo)
 target_link_libraries(${PROJECT_NAME} PUBLIC sqlite3)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Multimedia)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::MultimediaWidgets)
 set_target_properties(krill-media-storage PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}

@@ -182,7 +182,7 @@ void DatabaseController::InsertMedia(videoDataType &data)
    std::string createQuery;
    sqlite3_stmt *createStmt ;
 
-   createQuery = "INSERT OR REPLACE INTO VIDEO (TITLE, PATH, WIDTH , HEIGHT, DATE_CREATED ,DATE_MODIFIED , FILETYPE , CODEC , DURATION , SIZE) "\
+   createQuery = "INSERT INTO VIDEO (TITLE, PATH, WIDTH , HEIGHT, DATE_CREATED ,DATE_MODIFIED , FILETYPE , CODEC , DURATION , SIZE) "\
        "VALUES ((?), (?), (?), (?), (?), (?),(?), (?), (?), (?));";
    qDebug() <<  QString::fromStdString( createQuery);
    for (int var = 0; var < data.paths.size(); var++) {
@@ -207,7 +207,7 @@ void DatabaseController::InsertMedia(imageDataType &data)
     std::string createQuery;
     sqlite3_stmt *createStmt ;
 
-    createQuery = "INSERT OR REPLACE INTO IMAGE (TITLE,PATH,WIDTH ,HEIGHT, DATE_CREATED ,DATE_MODIFIED, FILETYPE, SIZE)"\
+    createQuery = "INSERT INTO IMAGE (TITLE,PATH,WIDTH ,HEIGHT, DATE_CREATED ,DATE_MODIFIED, FILETYPE, SIZE)"\
         "VALUES ((?), (?), (?), (?), (?), (?), (?), (?));";
 
     for (int var = 0; var < data.paths.size(); ++var) {
@@ -231,7 +231,7 @@ void DatabaseController::InsertMedia(audioDataType &data)
     std::string createQuery;
     sqlite3_stmt *createStmt ;
 
-    createQuery = "INSERT OR REPLACE INTO AUDIO (TITLE,PATH, DATE_CREATED ,DATE_MODIFIED,BITRATE, FILETYPE, ALBUM, BAND, TITLE_ENCODED,DURATIONS, SIZE)"\
+    createQuery = "INSERT INTO AUDIO (TITLE,PATH, DATE_CREATED ,DATE_MODIFIED,BITRATE, FILETYPE, ALBUM, BAND, TITLE_ENCODED,DURATIONS, SIZE)"\
         "VALUES ((?), (?), (?), (?), (?), (?), (?), (?), (?), (?),(?));";
 
     for (int var = 0; var < data.paths.size(); ++var) {
@@ -627,6 +627,93 @@ collectionData DatabaseController::getCollectionTable ()
     }
     return returnTable;
 }
+videoDataType  DatabaseController::getVideoByPath(QList<QString> paths)
+{
+    std::string createQuery ;
+    sqlite3_stmt *createStmt;
+    videoDataType returnTable;
+
+
+    foreach (QString var, paths) {
+        createQuery =  "SELECT * FROM VIDEO WHERE PATH like \"" + var.toStdString() + "\";";
+        sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
+        sqlite3_step(createStmt);
+        returnTable.id.append(sqlite3_column_int(createStmt, 0));
+        returnTable.titles.append( QString::fromUtf8( sqlite3_column_text(createStmt, 1)));
+        returnTable.paths.append( QString::fromUtf8( sqlite3_column_text(createStmt, 2)));
+        returnTable.widths.append( QString::fromUtf8( sqlite3_column_text(createStmt, 3)));
+        returnTable.heights.append( QString::fromUtf8( sqlite3_column_text(createStmt, 4)));
+        returnTable.rating.append(sqlite3_column_int(createStmt, 5));
+        returnTable.datesCreated.append( QString::fromUtf8( sqlite3_column_text(createStmt, 6)));
+        returnTable.datesModified.append( QString::fromUtf8( sqlite3_column_text(createStmt, 7)));
+        returnTable.filetypes.append( QString::fromUtf8( sqlite3_column_text(createStmt, 8)));
+        returnTable.codecs.append( QString::fromUtf8( sqlite3_column_text(createStmt, 9)));
+        returnTable.durations.append( QString::fromUtf8( sqlite3_column_text(createStmt, 10)));
+        returnTable.sizes.append( QString::fromUtf8( sqlite3_column_text(createStmt, 11)));
+        sqlite3_reset(createStmt);
+    }
+    return returnTable;
+
+}
+
+imageDataType  DatabaseController::getImageByPath(QList<QString> paths)
+{
+    std::string createQuery ;
+    sqlite3_stmt *createStmt;
+    imageDataType returnTable;
+
+
+    foreach (QString var, paths) {
+        createQuery =  "SELECT * FROM IMAGE WHERE PATH like \"" + var.toStdString() + "\";";
+        sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
+        sqlite3_step(createStmt);
+        returnTable.id.append(sqlite3_column_int(createStmt, 0));
+        returnTable.titles.append( QString::fromUtf8( sqlite3_column_text(createStmt, 1)));
+        returnTable.paths.append( QString::fromUtf8( sqlite3_column_text(createStmt, 2)));
+        returnTable.widths.append( QString::fromUtf8( sqlite3_column_text(createStmt, 3)));
+        returnTable.heights.append( QString::fromUtf8( sqlite3_column_text(createStmt, 4)));
+        returnTable.rating.append(sqlite3_column_int(createStmt, 5));
+        returnTable.datesCreated.append( QString::fromUtf8( sqlite3_column_text(createStmt, 6)));
+        returnTable.datesModified.append( QString::fromUtf8( sqlite3_column_text(createStmt, 7)));
+        returnTable.filetypes.append( QString::fromUtf8( sqlite3_column_text(createStmt, 8)));
+        returnTable.sizes.append( QString::fromUtf8( sqlite3_column_text(createStmt, 9)));
+        sqlite3_reset(createStmt);
+    }
+    return returnTable;
+
+}
+
+
+audioDataType  DatabaseController::getAudioByPath(QList<QString> paths)
+{
+    std::string createQuery ;
+    sqlite3_stmt *createStmt;
+    audioDataType returnTable;
+
+
+    foreach (QString var, paths) {
+        createQuery =  "SELECT * FROM AUDIO WHERE PATH like \"" + var.toStdString() + "\";";
+        qDebug() << QString::fromStdString(createQuery);
+        sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
+        sqlite3_step(createStmt);
+        returnTable.id.append(sqlite3_column_int(createStmt, 0));
+        returnTable.titles.append( QString::fromUtf8( sqlite3_column_text(createStmt, 1)));
+        returnTable.paths.append( QString::fromUtf8( sqlite3_column_text(createStmt, 2)));
+        returnTable.rating.append(sqlite3_column_int(createStmt, 3));
+        returnTable.datesCreated.append( QString::fromUtf8( sqlite3_column_text(createStmt, 4)));
+        returnTable.datesModified.append( QString::fromUtf8( sqlite3_column_text(createStmt, 5)));
+        returnTable.bitRates.append( QString::fromUtf8( sqlite3_column_text(createStmt, 6)));
+        returnTable.filetypes.append( QString::fromUtf8( sqlite3_column_text(createStmt, 7)));
+        returnTable.albums.append( QString::fromUtf8( sqlite3_column_text(createStmt, 8)));
+        returnTable.bands.append( QString::fromUtf8( sqlite3_column_text(createStmt, 9)));
+        returnTable.titlesEncoded.append( QString::fromUtf8( sqlite3_column_text(createStmt, 10)));
+        returnTable.durations.append( QString::fromUtf8( sqlite3_column_text(createStmt, 11)));
+        returnTable.sizes.append( QString::fromUtf8( sqlite3_column_text(createStmt, 12)));
+        sqlite3_reset(createStmt);
+    }
+    return returnTable;
+
+}
 
 videoDataType  DatabaseController::getVideoByCollection(int collectionId )
 {
@@ -637,7 +724,6 @@ videoDataType  DatabaseController::getVideoByCollection(int collectionId )
 
     createQuery =  "SELECT * FROM VIDEO, VIDEO_TO_COLLECTIONS where VIDEO.id = VIDEO_TO_COLLECTIONS.id_video and VIDEO_TO_COLLECTIONS.id_collection = (?);";
 
-    createQuery += ";";
     sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
     sqlite3_bind_int(createStmt, 1, collectionId);
     while (sqlite3_step(createStmt) != SQLITE_DONE) { // проблема - если таблица пустая то зацикливание
@@ -696,7 +782,7 @@ audioDataType  DatabaseController::getAudioByCollection(int collectionId )
 
     createQuery =  "SELECT * FROM audio, AUDIO_TO_COLLECTIONS where AUDIO.id = AUDIO_TO_COLLECTIONS.id_audio and AUDIO_TO_COLLECTIONS.id_collection = (?);";
 
-    createQuery += ";";
+
     sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
     sqlite3_bind_int(createStmt, 1, collectionId);
     while (sqlite3_step(createStmt) != SQLITE_DONE) { // проблема - если таблица пустая то зацикливание

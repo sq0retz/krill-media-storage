@@ -153,6 +153,9 @@ public:
     bool deleteMedia(QSet<int> id, mediaType type);
     tagData getTagTable ();
     collectionData getCollectionTable();
+    videoDataType  getVideoByPath(QList<QString> paths);
+    imageDataType  getImageByPath(QList<QString> paths);
+    audioDataType  getAudioByPath(QList<QString> paths);
     videoDataType  getVideoByCollection(int collectionId );
     imageDataType  getImageByCollection(int collectionId );
     audioDataType  getAudioByCollection(int collectionId );

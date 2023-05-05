@@ -1,7 +1,7 @@
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <QVideoWidget>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,25 +18,6 @@ MainWindow::MainWindow(QWidget *parent)
     centralWidgetStack->insertWidget(2, imageTable);
     centralWidgetStack->insertWidget(3, audioTable);
     this->setCentralWidget(centralWidgetStack);
-/*
-    QMediaPlayer akab;
-    akab.setSource(QUrl("C:/Users/Sqoretz/Videos/video_2022-09-24_01-26-01.mp4"));
-
-    QVideoWidget  *videoWidget= new QVideoWidget;
-    akab.setVideoOutput(videoWidget);
-    QVideoSink *aaa = new QVideoSink;
-    akab.setVideoSink(aaa);
-
-
-
-
-    connect(aaa,&QVideoSink::videoFrameChanged,this,&MainWindow::videoThumbnailCatcher);
-    videoWidget->show();
-   //akab.play();
-
-    if(akab.error() == 0)
-        qDebug() << "wada";
-*/
     updateCache();
     constructTopToolBar();
     constructRightDock();
@@ -199,11 +180,11 @@ void MainWindow::updateAudioTable()
     audioSearchType SearchConstraints;
     audioTableData = db->SearchMedia(SearchConstraints);
     audioTable->clear();
-    audioTable->sortItems(11,Qt::AscendingOrder);
+    audioTable->sortItems(12,Qt::AscendingOrder);
     audioTable->setRowCount(audioTableData.id.size());
-    audioTable->setColumnCount(12);
+    audioTable->setColumnCount(13);
     audioTable->setColumnHidden(2,true);
-    audioTable->setHorizontalHeaderLabels(QStringList() << "Название" << "Рейтинг" <<"" <<"Путь"<< "Дата создания"<< "Дата изменения"<< "Тип файла" <<"Группа"<<"Альбом"<<"Название" << "Продолжительность" <<"Размер");
+    audioTable->setHorizontalHeaderLabels(QStringList() << "Название" << "Рейтинг" <<"" <<"Путь"<< "Дата создания"<< "Дата изменения"<< "Битрейт"<< "Тип файла" <<"Группа"<<"Альбом"<<"Название" << "Продолжительность" <<"Размер");
     audioTable->setColumnWidth(0,500);
     audioTable->verticalHeader()->hide();
     audioTable->setSortingEnabled(true);
@@ -217,12 +198,13 @@ void MainWindow::updateAudioTable()
         audioTable->setItem(var , 3,new QTableWidgetItem(audioTableData.paths[var]) );
         audioTable->setItem(var , 4,new QTableWidgetItem(audioTableData.datesCreated[var]) );
         audioTable->setItem(var , 5,new QTableWidgetItem(audioTableData.datesModified[var]) );
-        audioTable->setItem(var , 6,new QTableWidgetItem(audioTableData.filetypes[var]) );
-        audioTable->setItem(var , 7,new QTableWidgetItem(audioTableData.bands[var]) );
-        audioTable->setItem(var , 8,new QTableWidgetItem(audioTableData.albums[var]) );
-        audioTable->setItem(var , 9,new QTableWidgetItem(audioTableData.titles[var]) );
-        audioTable->setItem(var , 10,new QTableWidgetItem(QString::number(audioTableData.durations[var].toDouble()/(1000*60))+ min)  );
-        audioTable->setItem(var , 11,new QTableWidgetItem(QString::number(audioTableData.sizes[var].toDouble()/(1024*1024))+ mb) );
+        audioTable->setItem(var , 6,new QTableWidgetItem(audioTableData.bitRates[var]) );
+        audioTable->setItem(var , 7,new QTableWidgetItem(audioTableData.filetypes[var]) );
+        audioTable->setItem(var , 8,new QTableWidgetItem(audioTableData.bands[var]) );
+        audioTable->setItem(var , 9,new QTableWidgetItem(audioTableData.albums[var]) );
+        audioTable->setItem(var , 10,new QTableWidgetItem(audioTableData.titles[var]) );
+        audioTable->setItem(var , 11,new QTableWidgetItem(QString::number(audioTableData.durations[var].toDouble()/(1000*60))+ min)  );
+        audioTable->setItem(var , 12,new QTableWidgetItem(QString::number(audioTableData.sizes[var].toDouble()/(1024*1024))+ mb) );
 
     }
     audioTable->sortItems(0,Qt::AscendingOrder);
@@ -313,10 +295,21 @@ void MainWindow::resetTagSelectionButtonPressed()
 
 void MainWindow::addFileButtonPressed()
 {
+    metaDataExtractor *extractor = new metaDataExtractor(fullPath, *db,tagMap,selectedTable);
     QFileDialog fd;
     QList<QUrl> urlList = fd.getOpenFileUrls();
-    qDebug() << "dw";
-    extractor->getMetaData(urlList);
+    if(urlList.empty()){
+        QMessageBox::warning(this,"Предупреждение", "Вы не выбрали файлы, вы что клоун?");
+    }
+    else{
+    switch (selectedTable)
+    {
+    case 1: extractor->getVideoMetaData(urlList ); break;
+    case 2: extractor->getImageMetaData(urlList );break;
+    case 3: extractor->getAudioMetaData(urlList );break;
+    default: break;
+    }
+    }
 }
 
 void MainWindow::updateTagsCache()
@@ -376,12 +369,7 @@ void MainWindow::ratingCellChanged(int row, int column)
     }
 }
 
-void MainWindow::videoThumbnailCatcher(const QVideoFrame &frame)
-{
-     qDebug() <<"wda";
-    QImage aka = frame.toImage();
-    aka.save("aaa","jpg",10);
-}
+
 MainWindow::~MainWindow()
 {
     delete ui;

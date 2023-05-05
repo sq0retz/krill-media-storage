@@ -5,9 +5,6 @@
 #include <QMainWindow>
 #include <QtWidgets>
 #include <databasecontroller.h>
-#include <QMediaPlayer>
-#include <QVideoFrame>
-#include <QVideoSink>
 #include <metadataextractor.h>
 
 QT_BEGIN_NAMESPACE
@@ -41,7 +38,7 @@ private:
     audioDataType audioTableData;
     tagData tagsCache;
     DatabaseController *db = new DatabaseController(fullPath);
-    metaDataExtractor *extractor = new metaDataExtractor(fullPath, *db);
+
     QSet<int> tagsToAddToMedias;
     int selectedTable = 1;
     void constructTopToolBar();
@@ -64,7 +61,7 @@ private slots:
     void resetTagSelectionButtonPressed();
     void ratingCellChanged(int row, int column);
     void selectTag(int index);
-    void videoThumbnailCatcher(const QVideoFrame &frame);
+
 };
 
 #endif // MAINWINDOW_H
