@@ -103,6 +103,7 @@ private slots:
     void deleteButtonPressed();
     void addTagButtonPressed();
     void addFileButtonPressed();
+    void tableCellClicked(int row, int column);
     /*!
     Нажатие кнопки добавления нового тега
     */

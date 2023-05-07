@@ -180,7 +180,7 @@ void MainWindow::updateVideoTable()
         videoTable->setItem(var , 0,new QTableWidgetItem(videoTableData.titles[var]) );
         videoTable->setItem(var , 1,new QTableWidgetItem(QString::number(videoTableData.rating[var])) );
         videoTable->setItem(var , 2,new QTableWidgetItem(QString::number(videoTableData.id[var])  ));
-        videoTable->setItem(var , 3,new QTableWidgetItem(videoTableData.paths[var]) );
+        videoTable->setItem(var , 3,new QTableWidgetItem(videoTableData.paths[var].remove(0,1)) );
         videoTable->setItem(var , 4,new QTableWidgetItem(videoTableData.widths[var]) );
         videoTable->setItem(var , 5,new QTableWidgetItem(videoTableData.heights[var]) );
         videoTable->setItem(var , 6,new QTableWidgetItem(videoTableData.datesCreated[var]) );
@@ -193,6 +193,8 @@ void MainWindow::updateVideoTable()
     }
     videoTable->sortItems(0,Qt::AscendingOrder);
     connect(videoTable,&QTableWidget::cellChanged,this, &MainWindow::ratingCellChanged );
+    connect(videoTable, &QTableWidget::cellDoubleClicked,this, &MainWindow::tableCellClicked);
+    connect(videoTable, &QTableWidget::cellEntered,this, &MainWindow::tableCellClicked);
 }
 
 void MainWindow::updateImageTable()
@@ -215,7 +217,7 @@ void MainWindow::updateImageTable()
         imageTable->setItem(var , 0,new QTableWidgetItem(imageTableData.titles[var]) );
         imageTable->setItem(var , 1,new QTableWidgetItem(QString::number(imageTableData.rating[var])) );
         imageTable->setItem(var , 2,new QTableWidgetItem(QString::number(imageTableData.id[var]) ) );
-        imageTable->setItem(var , 3,new QTableWidgetItem(imageTableData.paths[var]) );
+        imageTable->setItem(var , 3,new QTableWidgetItem(imageTableData.paths[var].remove(0,1)) );
         imageTable->setItem(var , 4,new QTableWidgetItem(imageTableData.widths[var]) );
         imageTable->setItem(var , 5,new QTableWidgetItem(imageTableData.heights[var]) );
         imageTable->setItem(var , 6,new QTableWidgetItem(imageTableData.datesCreated[var]) );
@@ -225,6 +227,7 @@ void MainWindow::updateImageTable()
     }
       imageTable->sortItems(0,Qt::AscendingOrder);
     connect(imageTable,&QTableWidget::cellChanged,this, &MainWindow::ratingCellChanged );
+    connect(imageTable, &QTableWidget::cellDoubleClicked,this, &MainWindow::tableCellClicked);
 }
 
 void MainWindow::updateAudioTable()
@@ -248,7 +251,7 @@ void MainWindow::updateAudioTable()
         audioTable->setItem(var , 0,new QTableWidgetItem(audioTableData.titles[var]) );
         audioTable->setItem(var , 1,new QTableWidgetItem(QString::number(audioTableData.rating[var])) );
         audioTable->setItem(var , 2,new QTableWidgetItem(QString::number(audioTableData.id[var]) ) );
-        audioTable->setItem(var , 3,new QTableWidgetItem(audioTableData.paths[var]) );
+        audioTable->setItem(var , 3,new QTableWidgetItem(audioTableData.paths[var].remove(0,1)) );
         audioTable->setItem(var , 4,new QTableWidgetItem(audioTableData.datesCreated[var]) );
         audioTable->setItem(var , 5,new QTableWidgetItem(audioTableData.datesModified[var]) );
         audioTable->setItem(var , 6,new QTableWidgetItem(audioTableData.bitRates[var]) );
@@ -262,6 +265,7 @@ void MainWindow::updateAudioTable()
     }
     audioTable->sortItems(0,Qt::AscendingOrder);
     connect(audioTable,&QTableWidget::cellChanged,this, &MainWindow::ratingCellChanged );
+    connect(audioTable, &QTableWidget::cellDoubleClicked,this, &MainWindow::tableCellClicked);
 }
 void MainWindow::videoToolBarPressed()
 {
@@ -348,6 +352,7 @@ void MainWindow::resetTagSelectionButtonPressed()
 
 void MainWindow::addFileButtonPressed()
 {
+
     metaDataExtractor *extractor = new metaDataExtractor(fullPath, *db,tagMap,selectedTable);
     QFileDialog fd;
     QList<QUrl> urlList = fd.getOpenFileUrls();
@@ -357,12 +362,13 @@ void MainWindow::addFileButtonPressed()
     else{
     switch (selectedTable)
     {
-    case 1: extractor->getVideoMetaData(urlList ); break;
+    case 1: extractor->getVideoMetaData(urlList );break;
     case 2: extractor->getImageMetaData(urlList );break;
     case 3: extractor->getAudioMetaData(urlList );break;
     default: break;
     }
     }
+
 }
 
 void MainWindow::updateTagsCache()
@@ -409,11 +415,13 @@ void MainWindow::selectTag(int index)
     if(inserted ){
     tagSelection->setText(tagSelection->text().append(" " + tagComboBox->itemText(index)));
     }
+     //qDebug()<< tagsToAddToMedias;
+    //qDebug() << tagSelection->text();
 }
 
 void MainWindow::ratingCellChanged(int row, int column)
 {
-    DatabaseController *db = new DatabaseController(fullPath);
+    if (column == 1)
     switch (selectedTable)
     {
     case 1:db->SetMediaRating(videoTable->item(row,2)->text().toInt(), DatabaseController::VIDEO_TYPE,videoTable->item(row,1)->text().toInt());break;
@@ -422,6 +430,17 @@ void MainWindow::ratingCellChanged(int row, int column)
     }
 }
 
+void MainWindow::tableCellClicked(int row, int column)
+{
+    if (column != 1)
+    switch (selectedTable)
+    {
+    case 1:QDesktopServices::openUrl(QUrl::fromLocalFile(videoTable->item(row,3)->text()));break;
+    case 2:QDesktopServices::openUrl(QUrl::fromLocalFile(imageTable->item(row,3)->text()));break;
+    case 3:QDesktopServices::openUrl(QUrl::fromLocalFile(audioTable->item(row,3)->text()));break;
+    }
+
+}
 
 MainWindow::~MainWindow()
 {

@@ -23,6 +23,7 @@
 */
 class metaDataExtractor : public QObject
 {
+      Q_OBJECT
 public:
     /*!
     Конструктор объекта
@@ -76,9 +77,12 @@ private:
     \return лейаут
     */
     QVBoxLayout* constructTagBar();
-    QComboBox *tagComboBox = new QComboBox;///< указатель на комбобокс тегов
+    QComboBox  *tagComboBox = new QComboBox;///< указатель на комбобокс тегов
     QLabel *tagSelection = new QLabel; ///< указатель на поле текста с выбранными тегами
-    MediaInfoDLL::MediaInfo *mi = new MediaInfoDLL::MediaInfo; ///< указатель на обьект mediainfo
+    std::unique_ptr<MediaInfoDLL::MediaInfo> mi = std::make_unique<MediaInfoDLL::MediaInfo>();
+
+    //MediaInfoDLL::MediaInfo *mi = new MediaInfoDLL::MediaInfo; ///< указатель на обьект mediainfo
+
     DatabaseController *daba ; ///< указатель на контроллер баз даных
     QString fullPath;  ///< путь до базы данных
     QSet<QString> videoTypes = {"Matroska","FLV","VOB","AVI","QuickTime", "MPEG-4","MXF","NSV","WEBM"}; ///< набор поддерживаемых видов видео

@@ -223,10 +223,11 @@ QVBoxLayout* metaDataExtractor::constructTagBar()
     rightDockLayout->addWidget(tagSelection);
     rightDockLayout->addWidget(addTagButton);
     rightDockLayout->addWidget(resetTagsSelectionButton);
+    updateTagComboBox();
     connect (addTagButton, &QPushButton::pressed, this, &metaDataExtractor::addTagButtonPressed);
     connect (tagComboBox, &QComboBox::currentIndexChanged,this, &metaDataExtractor::selectTag);
     connect (resetTagsSelectionButton, &QPushButton::pressed, this, &metaDataExtractor::resetTagSelectionButtonPressed);
-    updateTagComboBox();
+
     return rightDockLayout;
 }
 
@@ -238,10 +239,13 @@ void metaDataExtractor::selectTag(int index)
     if(inserted ){
         tagSelection->setText(tagSelection->text().append(" " + tagComboBox->itemText(index)));
     }
+   // qDebug()<< tagsToAddToMedias;
+    //qDebug() << tagSelection->text();
 }
 void metaDataExtractor::updateTagComboBox()
 {
     tagComboBox->clear();
+
     for (QString var : tagMapLocal){
         tagComboBox->addItem(var);
     }
