@@ -550,16 +550,16 @@ imageDataType DatabaseController::SearchImageTags( QList<int> idTags)
     if (idTags.size() == 0)  //защита на случай отсутствия тегов ERROR
         return returnTable;
 
-    createQuery =  "select * from VIDEO";
+    createQuery =  "select * from IMAGE";
     for (int i = 1; i < idTags.size() + 1; i++)
     {
-        createQuery += ", VIDEO_TO_TAGS as t" + std::to_string(i) + " ";
+        createQuery += ", IMAGE_TO_TAGS as t" + std::to_string(i) + " ";
     }
     createQuery += "WHERE ";
-    createQuery += "VIDEO.ID = t1.id_video and t1.id_tag = " + std::to_string(idTags[0]);
+    createQuery += "IMAGE.ID = t1.id_image and t1.id_tag = " + std::to_string(idTags[0]);
     for (int i = 2; i < idTags.size() + 1; i++)
     {
-        createQuery += " and VIDEO.ID = t" + std::to_string(i) + ".id_video and t" +  std::to_string(i) + ".id_tag = " + std::to_string(idTags[i-1]);
+        createQuery += " and IMAGE.ID = t" + std::to_string(i) + ".id_image and t" +  std::to_string(i) + ".id_tag = " + std::to_string(idTags[i-1]);
     }
     createQuery += ";";
     sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
