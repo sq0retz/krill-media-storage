@@ -87,6 +87,7 @@ void MainWindow::constructRightDock()
     QPushButton *addTagButton = new QPushButton;
     QPushButton *resetTagsSelectionButton = new QPushButton;
     QPushButton *addNewTagButton = new QPushButton;
+    QPushButton *searchByTagsButton = new QPushButton;
     QVBoxLayout *rightDockLayout = new QVBoxLayout;
     QHBoxLayout *comboBoxAddButtonlayout = new QHBoxLayout;
     QLabel * mainText = new QLabel;
@@ -96,7 +97,8 @@ void MainWindow::constructRightDock()
     tagSelection->setWordWrap(true);
     addTagButton->setText("Добавить теги");
     resetTagsSelectionButton->setText("Очистить выборку");
-    mainText->setText("Добавление тегов");
+    mainText->setText("Теги");
+    searchByTagsButton->setText("Поиск по тегам");
     addNewTagButton->setText("+");
     addNewTagButton->setFixedHeight(25);
     addNewTagButton->setFixedWidth(25);
@@ -108,6 +110,7 @@ void MainWindow::constructRightDock()
     rightDockLayout->addLayout(comboBoxAddButtonlayout);
     rightDockLayout->addWidget(tagSelection);
     rightDockLayout->addWidget(addTagButton);
+    rightDockLayout->addWidget(searchByTagsButton);
     rightDockLayout->addWidget(resetTagsSelectionButton);
     rightDockWidget->setLayout(rightDockLayout);
     rightDock->setWidget(rightDockWidget);
@@ -115,7 +118,9 @@ void MainWindow::constructRightDock()
     connect(tagComboBox, &QComboBox::currentIndexChanged,this, &MainWindow::selectTag);
     connect(resetTagsSelectionButton, &QPushButton::pressed, this, &MainWindow::resetTagSelectionButtonPressed);
     connect(addNewTagButton, &QPushButton::pressed,this, &MainWindow::addNewTagButtonPressed);
+    connect(searchByTagsButton, &QPushButton::pressed,this, &MainWindow::searchByTagsButtonPressed);
 }
+
 
 void MainWindow::addNewTagButtonPressed()
 {
@@ -158,11 +163,9 @@ void MainWindow::addNewTagButtonPressed()
 
 }
 
-void MainWindow::updateVideoTable()
+void MainWindow::updateVideoTable(videoDataType videoTableData)
 {
 
-    videoSearchType SearchConstraints;
-    videoTableData = db->SearchMedia(SearchConstraints);
     videoTable->clear();
     videoTable->sortItems(11,Qt::AscendingOrder);
     videoTable->setRowCount(videoTableData.id.size());
@@ -194,14 +197,10 @@ void MainWindow::updateVideoTable()
     videoTable->sortItems(0,Qt::AscendingOrder);
     connect(videoTable,&QTableWidget::cellChanged,this, &MainWindow::ratingCellChanged );
     connect(videoTable, &QTableWidget::cellDoubleClicked,this, &MainWindow::tableCellClicked);
-    connect(videoTable, &QTableWidget::cellEntered,this, &MainWindow::tableCellClicked);
 }
 
-void MainWindow::updateImageTable()
+void MainWindow::updateImageTable(imageDataType imageTableData)
 {
-
-    imageSearchType SearchConstraints;
-    imageTableData = db->SearchMedia(SearchConstraints);
     imageTable->clear();
     imageTable->sortItems(9,Qt::AscendingOrder);
     imageTable->setRowCount(imageTableData.id.size());
@@ -230,11 +229,8 @@ void MainWindow::updateImageTable()
     connect(imageTable, &QTableWidget::cellDoubleClicked,this, &MainWindow::tableCellClicked);
 }
 
-void MainWindow::updateAudioTable()
+void MainWindow::updateAudioTable(audioDataType audioTableData)
 {
-
-    audioSearchType SearchConstraints;
-    audioTableData = db->SearchMedia(SearchConstraints);
     audioTable->clear();
     audioTable->sortItems(12,Qt::AscendingOrder);
     audioTable->setRowCount(audioTableData.id.size());
@@ -269,26 +265,20 @@ void MainWindow::updateAudioTable()
 }
 void MainWindow::videoToolBarPressed()
 {
-   // updateVideoTable();
     selectedTable = 1;
-   // videoTable->sortItems(0,Qt::AscendingOrder);
     centralWidgetStack->setCurrentIndex(0);
 }
 
 void MainWindow::imageToolBarPressed()
 {
-   // updateImageTable();
     selectedTable = 2;
-   // imageTable->sortItems(0,Qt::AscendingOrder);
     centralWidgetStack->setCurrentIndex(1);
 
 }
 
 void MainWindow::audioToolBarPressed()
 {
-    // updateImageTable();
     selectedTable = 3;
-   // audioTable->sortItems(0,Qt::AscendingOrder);
     centralWidgetStack->setCurrentIndex(2);
 
 }
@@ -308,20 +298,23 @@ void MainWindow::deleteButtonPressed()
     case 1:selectedItems = videoTable->selectedItems();
         for (QTableWidgetItem* var : selectedItems) {
             idItemsForDeletion.insert((videoTable->item(var->row(),2)->text().toInt()));
+            videoTable->removeRow(var->row());
         }
             db->deleteMedia(idItemsForDeletion,DatabaseController::VIDEO_TYPE);  break;
     case 2: selectedItems = imageTable->selectedItems();
         for (QTableWidgetItem* var : selectedItems) {
             idItemsForDeletion.insert((imageTable->item(var->row(),2)->text().toInt()));
+            imageTable->removeRow(var->row());
         }
             db->deleteMedia(idItemsForDeletion,DatabaseController::IMAGE_TYPE);  break;
     case 3: selectedItems = audioTable->selectedItems();
             for (QTableWidgetItem* var : selectedItems) {
             idItemsForDeletion.insert((audioTable->item(var->row(),2)->text().toInt()));
+            audioTable->removeRow(var->row());
             }
             db->deleteMedia(idItemsForDeletion,DatabaseController::AUDIO_TYPE);  break;
     }
-    updateCache();
+
 }
 void MainWindow::addTagButtonPressed()
 {
@@ -331,15 +324,15 @@ void MainWindow::addTagButtonPressed()
     {
     case 1:selectedItems = videoTable->selectedItems();
         for (QTableWidgetItem* var : selectedItems) {
-            db->AddTagsToMedia(videoTable->item(var->row(),2)->text().toInt(),DatabaseController::VIDEO_TYPE,tagsToAddToMedias);
+            db->AddTagsToMedia(videoTable->item(var->row(),2)->text().toInt(),DatabaseController::VIDEO_TYPE,chosenTagsSet);
         }; break;
     case 2: selectedItems = imageTable->selectedItems();
         for (QTableWidgetItem* var : selectedItems) {
-            db->AddTagsToMedia(imageTable->item(var->row(),2)->text().toInt(),DatabaseController::IMAGE_TYPE,tagsToAddToMedias);
+            db->AddTagsToMedia(imageTable->item(var->row(),2)->text().toInt(),DatabaseController::IMAGE_TYPE,chosenTagsSet);
         }; break;
     case 3: selectedItems = audioTable->selectedItems();
         for (QTableWidgetItem* var : selectedItems) {
-            db->AddTagsToMedia(audioTable->item(var->row(),2)->text().toInt(),DatabaseController::AUDIO_TYPE,tagsToAddToMedias);
+            db->AddTagsToMedia(audioTable->item(var->row(),2)->text().toInt(),DatabaseController::AUDIO_TYPE,chosenTagsSet);
         }; break;
     }
      updateTagComboBox();
@@ -389,17 +382,60 @@ void MainWindow::updateTagComboBox()
         tagComboBox->addItem(var);
     }
     tagComboBox->setCurrentIndex(-1);
-    tagsToAddToMedias.clear();
+    chosenTagsSet.clear();
     tagSelection->setText("");
 
 }
 
+videoDataType MainWindow::getVideoTableData()
+{
+    videoDataType videoTableData;
+    videoSearchType SearchConstraints;
+    return videoTableData = db->SearchMedia(SearchConstraints);
+}
+imageDataType MainWindow::getImageTableData()
+{
+    imageDataType imageTableData;
+    imageSearchType SearchConstraints;
+    return imageTableData = db->SearchMedia(SearchConstraints);
+}
+audioDataType MainWindow::getAudioTableData()
+{
+    audioDataType audioTableData;
+    audioSearchType SearchConstraints;
+    return audioTableData = db->SearchMedia(SearchConstraints);
+}
+videoDataType MainWindow::getVideoTableDataByTags()
+{
+    videoDataType videoTableData;
+    QList<int> listOfTags;
+    foreach (const int &value, chosenTagsSet)
+        listOfTags.append(value);
+    return videoTableData = db->SearchVideoTags(listOfTags);
+}
+imageDataType MainWindow::getImageTableDataByTags()
+{
+    imageDataType imageTableData;
+    QList<int> listOfTags;
+    foreach (const int &value, chosenTagsSet)
+        listOfTags.append(value);
+    return imageTableData = db->SearchImageTags(listOfTags);
+}
+
+audioDataType MainWindow::getAudioTableDataByTags()
+{
+    audioDataType audioTableData;
+    QList<int> listOfTags;
+    foreach (const int &value, chosenTagsSet)
+        listOfTags.append(value);
+    return audioTableData = db->SearchAudioTags(listOfTags);
+}
+
 void MainWindow::updateCache()
 {
-
-    updateVideoTable();
-    updateImageTable();
-    updateAudioTable();
+    updateVideoTable(getVideoTableData());
+    updateImageTable(getImageTableData());
+    updateAudioTable(getAudioTableData());
     updateTagsCache();
     updateTagComboBox();
 }
@@ -409,13 +445,13 @@ void MainWindow::updateToolBarPressed()
 }
 void MainWindow::selectTag(int index)
 {
-    int size = tagsToAddToMedias.count();
-    tagsToAddToMedias.insert(tagMap.key(tagComboBox->itemText(index)));
-    bool inserted = tagsToAddToMedias.count() > size;
+    int size = chosenTagsSet.count();
+    chosenTagsSet.insert(tagMap.key(tagComboBox->itemText(index)));
+    bool inserted = chosenTagsSet.count() > size;
     if(inserted ){
     tagSelection->setText(tagSelection->text().append(" " + tagComboBox->itemText(index)));
     }
-     //qDebug()<< tagsToAddToMedias;
+     //qDebug()<< chosenTagsSet;
     //qDebug() << tagSelection->text();
 }
 
@@ -440,6 +476,16 @@ void MainWindow::tableCellClicked(int row, int column)
     case 3:QDesktopServices::openUrl(QUrl::fromLocalFile(audioTable->item(row,3)->text()));break;
     }
 
+}
+
+void MainWindow::searchByTagsButtonPressed()
+{
+    switch (selectedTable)
+    {
+    case 1:updateVideoTable(getVideoTableDataByTags());break;
+    case 2:updateImageTable(getImageTableDataByTags());break;
+    case 3:updateAudioTable(getAudioTableDataByTags());break;
+    }
 }
 
 MainWindow::~MainWindow()

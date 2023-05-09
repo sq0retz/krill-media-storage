@@ -49,14 +49,12 @@ private:
     QComboBox *tagComboBox = new QComboBox; ///< указатель на обьект выбора тегов
     QLabel *tagSelection = new QLabel; ///< указатель на вывод выбранных для добавления тегов
     QMap<int ,QString> tagMap; ///< пары айди тега и его имени
-    QString fullPath = "C:/temp/maindb.db"; ///< путь до базы данных
-
-    videoDataType videoTableData; ///< структура для хранения данных видео из базы данных
+    QString fullPath = "C:/temp/maindb.db"; ///< путь до базы данных 
     imageDataType imageTableData; ///< структура для хранения данных изображений из базы данных
     audioDataType audioTableData; ///< структура для хранения данных аудио из базы данных
     tagData tagsCache;  ///< структура для хранения тегов из базы данных
     DatabaseController *db = new DatabaseController(fullPath); ///< указатель на контроллер базы данных
-    QSet<int> tagsToAddToMedias; ///< набор тегов для добавления к медиа
+    QSet<int> chosenTagsSet; ///< набор тегов для добавления к медиа
     int selectedTable = 1;   ///< номер выбранной сейчас таблицы
     /*!
     Конструирует верхнюю панель инструментов
@@ -73,15 +71,15 @@ private:
     /*!
     Обновляет таблицу видео
     */
-    void updateVideoTable();
+    void updateVideoTable(videoDataType videoTableData);
     /*!
     Обновляет таблицу изображений
     */
-    void updateImageTable();
+    void updateImageTable(imageDataType imageTableData);
     /*!
     Обновляет таблицу аудио
     */
-    void updateAudioTable();
+    void updateAudioTable(audioDataType audioTableData);
     /*!
     Обновляет кеш тегов
     */
@@ -94,6 +92,12 @@ private:
     Обновляет весь кеш
     */
     void updateCache();
+    videoDataType getVideoTableData();
+    videoDataType getVideoTableDataByTags();
+    imageDataType getImageTableData();
+    imageDataType getImageTableDataByTags();
+    audioDataType getAudioTableData();
+    audioDataType getAudioTableDataByTags();
 private slots:
 
     void videoToolBarPressed();
@@ -103,6 +107,7 @@ private slots:
     void deleteButtonPressed();
     void addTagButtonPressed();
     void addFileButtonPressed();
+    void searchByTagsButtonPressed();
     void tableCellClicked(int row, int column);
     /*!
     Нажатие кнопки добавления нового тега
