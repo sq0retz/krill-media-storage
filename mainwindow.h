@@ -107,6 +107,7 @@ private slots:
     void deleteButtonPressed();
     void addTagButtonPressed();
     void addFileButtonPressed();
+    void resetTagSearchButtonPressed();
     void searchByTagsButtonPressed();
     void tableCellClicked(int row, int column);
     /*!

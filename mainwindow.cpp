@@ -88,6 +88,7 @@ void MainWindow::constructRightDock()
     QPushButton *resetTagsSelectionButton = new QPushButton;
     QPushButton *addNewTagButton = new QPushButton;
     QPushButton *searchByTagsButton = new QPushButton;
+    QPushButton *resetTagSearchButton = new QPushButton;
     QVBoxLayout *rightDockLayout = new QVBoxLayout;
     QHBoxLayout *comboBoxAddButtonlayout = new QHBoxLayout;
     QLabel * mainText = new QLabel;
@@ -99,6 +100,7 @@ void MainWindow::constructRightDock()
     resetTagsSelectionButton->setText("Очистить выборку");
     mainText->setText("Теги");
     searchByTagsButton->setText("Поиск по тегам");
+    resetTagSearchButton->setText("Сброс поиска");
     addNewTagButton->setText("+");
     addNewTagButton->setFixedHeight(25);
     addNewTagButton->setFixedWidth(25);
@@ -111,6 +113,7 @@ void MainWindow::constructRightDock()
     rightDockLayout->addWidget(tagSelection);
     rightDockLayout->addWidget(addTagButton);
     rightDockLayout->addWidget(searchByTagsButton);
+    rightDockLayout->addWidget(resetTagSearchButton);
     rightDockLayout->addWidget(resetTagsSelectionButton);
     rightDockWidget->setLayout(rightDockLayout);
     rightDock->setWidget(rightDockWidget);
@@ -119,6 +122,8 @@ void MainWindow::constructRightDock()
     connect(resetTagsSelectionButton, &QPushButton::pressed, this, &MainWindow::resetTagSelectionButtonPressed);
     connect(addNewTagButton, &QPushButton::pressed,this, &MainWindow::addNewTagButtonPressed);
     connect(searchByTagsButton, &QPushButton::pressed,this, &MainWindow::searchByTagsButtonPressed);
+    connect(resetTagSearchButton, &QPushButton::pressed,this, &MainWindow::resetTagSearchButtonPressed);
+
 }
 
 
@@ -438,6 +443,8 @@ void MainWindow::updateCache()
     updateAudioTable(getAudioTableData());
     updateTagsCache();
     updateTagComboBox();
+
+
 }
 void MainWindow::updateToolBarPressed()
 {
@@ -488,6 +495,17 @@ void MainWindow::searchByTagsButtonPressed()
     }
 }
 
+void MainWindow::resetTagSearchButtonPressed()
+{
+    {
+    switch (selectedTable)
+    {
+    case 1:updateVideoTable(getVideoTableData());break;
+    case 2:updateImageTable(getImageTableData());break;
+    case 3:updateAudioTable(getAudioTableData());break;
+    }
+    }
+}
 MainWindow::~MainWindow()
 {
     delete ui;
