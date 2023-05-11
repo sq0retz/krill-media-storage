@@ -237,6 +237,8 @@ public:
     \return Была ли успешна операция
     */
     bool deleteMedia(QSet<int> id, mediaType type);
+    bool deleteTags(QSet<int> idTags);
+    //bool deleteTagsToMedia(QSet<int> idTags, mediaType type, )
     /*!
     Извлекает всю таблицу тегов
     \return таблица тегов

@@ -126,6 +126,8 @@ private slots:
     \param[in] index тега в комбобоксе
     */
     void selectTag(int index);
+    void updateSelectedTable();
+    void deleteTagsFromBdSlot();
 
 };
 

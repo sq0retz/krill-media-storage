@@ -89,6 +89,7 @@ void MainWindow::constructRightDock()
     QPushButton *addNewTagButton = new QPushButton;
     QPushButton *searchByTagsButton = new QPushButton;
     QPushButton *resetTagSearchButton = new QPushButton;
+    QPushButton *deleteTagsFromDbButton = new QPushButton;
     QVBoxLayout *rightDockLayout = new QVBoxLayout;
     QHBoxLayout *comboBoxAddButtonlayout = new QHBoxLayout;
     QLabel * mainText = new QLabel;
@@ -96,11 +97,12 @@ void MainWindow::constructRightDock()
     tagComboBox->setEditable(true);
     tagSelection->setAlignment(Qt::AlignCenter);
     tagSelection->setWordWrap(true);
-    addTagButton->setText("Добавить теги");
+    addTagButton->setText("Добавить теги к медиа");
     resetTagsSelectionButton->setText("Очистить выборку");
     mainText->setText("Теги");
     searchByTagsButton->setText("Поиск по тегам");
     resetTagSearchButton->setText("Сброс поиска");
+    deleteTagsFromDbButton->setText("Удалить теги из БД");
     addNewTagButton->setText("+");
     addNewTagButton->setFixedHeight(25);
     addNewTagButton->setFixedWidth(25);
@@ -115,6 +117,7 @@ void MainWindow::constructRightDock()
     rightDockLayout->addWidget(searchByTagsButton);
     rightDockLayout->addWidget(resetTagSearchButton);
     rightDockLayout->addWidget(resetTagsSelectionButton);
+    rightDockLayout->addWidget(deleteTagsFromDbButton);
     rightDockWidget->setLayout(rightDockLayout);
     rightDock->setWidget(rightDockWidget);
     connect(addTagButton, &QPushButton::pressed, this, &MainWindow::addTagButtonPressed);
@@ -123,6 +126,7 @@ void MainWindow::constructRightDock()
     connect(addNewTagButton, &QPushButton::pressed,this, &MainWindow::addNewTagButtonPressed);
     connect(searchByTagsButton, &QPushButton::pressed,this, &MainWindow::searchByTagsButtonPressed);
     connect(resetTagSearchButton, &QPushButton::pressed,this, &MainWindow::resetTagSearchButtonPressed);
+    connect(deleteTagsFromDbButton, &QPushButton::pressed,this, &MainWindow::deleteTagsFromBdSlot);
 
 }
 
@@ -367,6 +371,7 @@ void MainWindow::addFileButtonPressed()
     }
     }
 
+
 }
 
 void MainWindow::updateTagsCache()
@@ -497,13 +502,28 @@ void MainWindow::searchByTagsButtonPressed()
 
 void MainWindow::resetTagSearchButtonPressed()
 {
-    {
+
+    updateSelectedTable();
+}
+void MainWindow::updateSelectedTable()
+{
     switch (selectedTable)
     {
     case 1:updateVideoTable(getVideoTableData());break;
     case 2:updateImageTable(getImageTableData());break;
     case 3:updateAudioTable(getAudioTableData());break;
     }
+}
+
+void MainWindow::deleteTagsFromBdSlot()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this," ","Вы уверены что хотите удалите эти теги(вместе с тегами удалятся и связи файлов с ними)?",QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+    {
+        db->deleteTags(chosenTagsSet);
+        updateTagsCache();
+        updateTagComboBox();
     }
 }
 MainWindow::~MainWindow()

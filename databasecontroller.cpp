@@ -827,6 +827,22 @@ bool DatabaseController::deleteMedia(QSet<int> id, mediaType type)
         return true;
 
 }
+
+bool DatabaseController::deleteTags(QSet<int> idTags)
+{
+    std::string createQuery ;
+    sqlite3_stmt *createStmt;
+
+    createQuery = "DELETE FROM TAGS WHERE ID = (?)";
+    for (int var : idTags) {
+        sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
+        sqlite3_bind_int(createStmt, 1, var);
+        sqlite3_step(createStmt);
+    }
+    return true;
+
+
+}
 DatabaseController::~DatabaseController()
 {
     delete path;
