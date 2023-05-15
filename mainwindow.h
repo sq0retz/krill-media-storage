@@ -41,6 +41,7 @@ public:
 private:
 
     Ui::MainWindow *ui; ///< указатель на объект разметки
+    QSettings *settings; ///< объект работающий с файлом настроек
     QTableWidget *videoTable; ///< указатель на таблицу видео
     QTableWidget *imageTable; ///< указатель на таблицу изображений
     QTableWidget *audioTable; ///< указатель на таблицу аудио
@@ -49,11 +50,11 @@ private:
     QComboBox *tagComboBox = new QComboBox; ///< указатель на обьект выбора тегов
     QLabel *tagSelection = new QLabel; ///< указатель на вывод выбранных для добавления тегов
     QMap<int ,QString> tagMap; ///< пары айди тега и его имени
-    QString fullPath = "C:/temp/maindb.db"; ///< путь до базы данных 
+    QString fullPath ; ///< путь до базы данных
     imageDataType imageTableData; ///< структура для хранения данных изображений из базы данных
     audioDataType audioTableData; ///< структура для хранения данных аудио из базы данных
     tagData tagsCache;  ///< структура для хранения тегов из базы данных
-    DatabaseController *db = new DatabaseController(fullPath); ///< указатель на контроллер базы данных
+    DatabaseController *db; ///< указатель на контроллер базы данных
     QSet<int> chosenTagsSet; ///< набор тегов для добавления к медиа
     int selectedTable = 1;   ///< номер выбранной сейчас таблицы
     /*!
@@ -68,6 +69,7 @@ private:
     Конструирует правый док
     */
     void constructRightDock();
+    void constructSettingsDialog();
     /*!
     Обновляет таблицу видео
     */
@@ -92,6 +94,7 @@ private:
     Обновляет весь кеш
     */
     void updateCache();
+    void initializeSettings();
     videoDataType getVideoTableData();
     videoDataType getVideoTableDataByTags();
     imageDataType getImageTableData();
@@ -103,6 +106,7 @@ private slots:
     void videoToolBarPressed();
     void imageToolBarPressed();
     void audioToolBarPressed();
+    void settingsToolBarPressed();
     void updateToolBarPressed();
     void deleteButtonPressed();
     void addTagButtonPressed();

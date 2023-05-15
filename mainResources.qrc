@@ -7,6 +7,7 @@
         <file>assets/updateIcon.png</file>
         <file>assets/imageIcon.png</file>
         <file>assets/addFileIcon.png</file>
+        <file>assets/settingsIcon.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

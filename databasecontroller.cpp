@@ -843,6 +843,30 @@ bool DatabaseController::deleteTags(QSet<int> idTags)
 
 
 }
+
+bool DatabaseController::deleteTagsFromMedia(int mediaId, mediaType type,  QSet<int> tags)
+{
+    if(tags.empty())
+        return false;
+
+    std::string createQuery ;
+    sqlite3_stmt *createStmt;
+    switch (type)
+    {
+    case 1: createQuery = "DELETE FROM VIDEO_TO_TAGS WHERE id_video = " + std::to_string(mediaId) + " AND id_tag = (?);"; break;
+    case 2: createQuery = "DELETE FROM AUDIO_TO_TAGS WHERE id_audio = " + std::to_string(mediaId) + " AND id_tag = (?);"; break;
+    case 3: createQuery = "DELETE FROM IMAGE_TO_TAGS WHERE id_image = " + std::to_string(mediaId) + " AND id_tag = (?);"; break;
+    default:  return false;
+    }
+    for (int tagId : tags)
+    {
+        sqlite3_prepare_v2( db, createQuery.c_str(), createQuery.size(), &createStmt, NULL);
+        sqlite3_bind_int(createStmt, 1, tagId);
+        if (sqlite3_step(createStmt) != 101)
+                return false;
+    }
+    return true;
+}
 DatabaseController::~DatabaseController()
 {
     delete path;

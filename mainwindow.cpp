@@ -11,6 +11,14 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    settings = new QSettings(QSettings::IniFormat,QSettings::UserScope,"FullDungeon", "krill", this);
+    if (settings->value("logic/notFirstlaunch").toBool() != true)
+    {
+        qDebug() << "dwada";
+        MainWindow::initializeSettings();
+    }
+    fullPath = settings->value("fileStorage/mainDatabasePath").toString() + "/KrillMainDb.db";
+    db = new DatabaseController(fullPath);
     ui->setupUi(this);
     centralWidgetStack = new QStackedWidget;
     videoTable = new QTableWidget;
@@ -27,6 +35,29 @@ MainWindow::MainWindow(QWidget *parent)
     constructRightDock();
     constructBottomToolBar();
 }
+
+
+void MainWindow::initializeSettings()
+{
+    settings->setValue("logic/notFirstlaunch", false);
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this," ","Хотите ли вы задать свой путь для хранения базы данных?",QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        QFileDialog fd;
+        settings->setValue("fileStorage/mainDatabasePath", fd.getExistingDirectory()  ); //добавить защиту от неверного пути и закрытия файлового диалога
+    }
+    else
+    {
+
+
+        settings->setValue("fileStorage/mainDatabasePath",  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) );
+    }
+    settings->setValue("logic/notFirstlaunch", true);
+
+}
+
 void MainWindow::constructTopToolBar()
 {
     QAction *videoAction = new QAction(tr("&нажать..."), this);
@@ -34,16 +65,25 @@ void MainWindow::constructTopToolBar()
     videoAction->setShortcuts(QKeySequence::Open);
     videoAction->setStatusTip(tr("Открыть таблицу видео"));
     ui->topToolBar->addAction(videoAction);
+
     QAction *imageAction = new QAction(tr("&нажать..."), this);
     imageAction->setIcon(QIcon(":/assets/icons/assets/imageIcon"));
     imageAction->setShortcuts(QKeySequence::Open);
     imageAction->setStatusTip(tr("Открыть таблицу изображений"));
     ui->topToolBar->addAction(imageAction);
+
     QAction *audioAction = new QAction(tr("&нажать..."), this);
     audioAction->setIcon(QIcon(":/assets/icons/assets/audioIcon"));
     audioAction->setShortcuts(QKeySequence::Open);
     audioAction->setStatusTip(tr("Открыть таблицу аудио"));
     ui->topToolBar->addAction(audioAction);
+
+    QAction *settingsAction = new QAction(tr("&настройки..."), this);
+    settingsAction->setIcon(QIcon(":/assets/icons/assets/settingsIcon"));
+    settingsAction->setShortcuts(QKeySequence::Open);
+    settingsAction->setStatusTip(tr("Открыть настройки"));
+    ui->topToolBar->addAction(settingsAction);
+
     QAction *updateAction = new QAction(tr("&Обновить..."), this);
     updateAction->setIcon(QIcon(":/assets/icons/assets/updateIcon"));
     updateAction->setShortcuts(QKeySequence::Open);
@@ -52,6 +92,8 @@ void MainWindow::constructTopToolBar()
     empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred); // вау, удобно
     ui->topToolBar->addWidget(empty);
     ui->topToolBar->addAction(updateAction);
+
+
     QSize topIconSize;
     topIconSize.setHeight(100);
     topIconSize.setWidth(100);
@@ -62,6 +104,7 @@ void MainWindow::constructTopToolBar()
     connect(imageAction, &QAction::triggered, this ,&MainWindow::imageToolBarPressed);
     connect(audioAction, &QAction::triggered, this ,&MainWindow::audioToolBarPressed);
     connect(updateAction, &QAction::triggered, this,&MainWindow::updateToolBarPressed);
+    connect(settingsAction, &QAction::triggered, this,&MainWindow::settingsToolBarPressed);
 
 }
 
@@ -93,23 +136,42 @@ void MainWindow::constructRightDock()
     QVBoxLayout *rightDockLayout = new QVBoxLayout;
     QHBoxLayout *comboBoxAddButtonlayout = new QHBoxLayout;
     QLabel * mainText = new QLabel;
-    this->addDockWidget(Qt::RightDockWidgetArea,rightDock);
+
     tagComboBox->setEditable(true);
+    connect(tagComboBox, &QComboBox::currentIndexChanged,this, &MainWindow::selectTag);
+
     tagSelection->setAlignment(Qt::AlignCenter);
     tagSelection->setWordWrap(true);
-    addTagButton->setText("Добавить теги к медиа");
-    resetTagsSelectionButton->setText("Очистить выборку");
+
     mainText->setText("Теги");
+    mainText->setAlignment(Qt::AlignTop);
+    mainText->setFixedHeight(15);
+
+    addTagButton->setText("Добавить теги к медиа");
+    connect(addTagButton, &QPushButton::pressed, this, &MainWindow::addTagButtonPressed);
+
+    resetTagsSelectionButton->setText("Очистить выборку");
+    connect(resetTagsSelectionButton, &QPushButton::pressed, this, &MainWindow::resetTagSelectionButtonPressed);
+
     searchByTagsButton->setText("Поиск по тегам");
+    connect(searchByTagsButton, &QPushButton::pressed,this, &MainWindow::searchByTagsButtonPressed);
+
     resetTagSearchButton->setText("Сброс поиска");
+    connect(resetTagSearchButton, &QPushButton::pressed,this, &MainWindow::resetTagSearchButtonPressed);
+
     deleteTagsFromDbButton->setText("Удалить теги из БД");
+    connect(deleteTagsFromDbButton, &QPushButton::pressed,this, &MainWindow::deleteTagsFromBdSlot);
+
+
     addNewTagButton->setText("+");
     addNewTagButton->setFixedHeight(25);
     addNewTagButton->setFixedWidth(25);
-    mainText->setAlignment(Qt::AlignTop);
-    mainText->setFixedHeight(15);
+    connect(addNewTagButton, &QPushButton::pressed,this, &MainWindow::addNewTagButtonPressed);
+
+
     comboBoxAddButtonlayout->addWidget(tagComboBox);
     comboBoxAddButtonlayout->addWidget(addNewTagButton);
+
     rightDockLayout->addWidget(mainText);
     rightDockLayout->addLayout(comboBoxAddButtonlayout);
     rightDockLayout->addWidget(tagSelection);
@@ -118,16 +180,11 @@ void MainWindow::constructRightDock()
     rightDockLayout->addWidget(resetTagSearchButton);
     rightDockLayout->addWidget(resetTagsSelectionButton);
     rightDockLayout->addWidget(deleteTagsFromDbButton);
+
     rightDockWidget->setLayout(rightDockLayout);
     rightDock->setWidget(rightDockWidget);
-    connect(addTagButton, &QPushButton::pressed, this, &MainWindow::addTagButtonPressed);
-    connect(tagComboBox, &QComboBox::currentIndexChanged,this, &MainWindow::selectTag);
-    connect(resetTagsSelectionButton, &QPushButton::pressed, this, &MainWindow::resetTagSelectionButtonPressed);
-    connect(addNewTagButton, &QPushButton::pressed,this, &MainWindow::addNewTagButtonPressed);
-    connect(searchByTagsButton, &QPushButton::pressed,this, &MainWindow::searchByTagsButtonPressed);
-    connect(resetTagSearchButton, &QPushButton::pressed,this, &MainWindow::resetTagSearchButtonPressed);
-    connect(deleteTagsFromDbButton, &QPushButton::pressed,this, &MainWindow::deleteTagsFromBdSlot);
 
+    this->addDockWidget(Qt::RightDockWidgetArea,rightDock);
 }
 
 
@@ -141,10 +198,7 @@ void MainWindow::addNewTagButtonPressed()
     QVBoxLayout *mainLayout = new QVBoxLayout;
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
 
-
     labelTagAdd->setText("Добавление новых тегов в базу даных");
-    addNewTagButton->setText("Добавить");
-    closeButton->setText("Выйти");
 
     buttonsLayout->addWidget(addNewTagButton);
     buttonsLayout->addWidget(closeButton);
@@ -157,12 +211,13 @@ void MainWindow::addNewTagButtonPressed()
     tagAddDialog->setModal(true);
     tagAddDialog->show();
 
-
+    addNewTagButton->setText("Добавить");
     connect(addNewTagButton, &QPushButton::pressed,[=]() {
         db->InsertTag(tagLine->text().remove(" "));
         tagLine->clear();
     });
 
+    closeButton->setText("Выйти");
     connect(closeButton, &QPushButton::pressed,[=]() {
         updateTagsCache();
         updateTagComboBox();
@@ -185,6 +240,7 @@ void MainWindow::updateVideoTable(videoDataType videoTableData)
     videoTable->setColumnWidth(3,500);
     videoTable->verticalHeader()->hide();
     videoTable->setSortingEnabled(true);
+    videoTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //большая нагрузка на систему
     QString min = " минут";
     QString gb = " Гб";
     disconnect(videoTable,&QTableWidget::cellChanged,this, &MainWindow::ratingCellChanged );
@@ -219,6 +275,7 @@ void MainWindow::updateImageTable(imageDataType imageTableData)
     imageTable->setColumnWidth(0,500);
     imageTable->verticalHeader()->hide();
     imageTable->setSortingEnabled(true);
+    imageTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //большая нагрузка на систему
     QString mb = " Мб";
     disconnect(imageTable,&QTableWidget::cellChanged,this, &MainWindow::ratingCellChanged );
     for (int var = 0; var < imageTableData.id.size(); ++var) {
@@ -249,6 +306,8 @@ void MainWindow::updateAudioTable(audioDataType audioTableData)
     audioTable->setColumnWidth(0,500);
     audioTable->verticalHeader()->hide();
     audioTable->setSortingEnabled(true);
+    audioTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //большая нагрузка на систему
+    audioTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); // все же лучше задать вручную размер колонн
     QString min = " минут";
     QString mb = " Мб";
     disconnect(audioTable,&QTableWidget::cellChanged,this, &MainWindow::ratingCellChanged );
@@ -289,6 +348,38 @@ void MainWindow::audioToolBarPressed()
 {
     selectedTable = 3;
     centralWidgetStack->setCurrentIndex(2);
+
+}
+
+void MainWindow::settingsToolBarPressed()
+{
+    constructSettingsDialog();
+
+}
+
+void MainWindow::constructSettingsDialog()
+{
+    QDialog *settingsDialog = new QDialog;
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QHBoxLayout *databasePathLayout = new QHBoxLayout;
+    QLabel *header = new QLabel;
+    QLabel *databasePathLabel = new QLabel;
+    QTextEdit *databasePathTextEdit = new QTextEdit;
+
+    header->setText("Настройки");
+    header->setAlignment(Qt::AlignVCenter);
+    databasePathLabel->setText("Путь до БД");
+    databasePathTextEdit->setText(settings->value("fileStorage/mainDatabasePath").toString());
+
+    settingsDialog->setLayout(mainLayout);
+    mainLayout->addWidget(header);
+    mainLayout->addLayout(databasePathLayout);
+
+    databasePathLayout->addWidget(databasePathLabel);
+    databasePathLayout->addWidget(databasePathTextEdit);
+
+    settingsDialog->show();
+
 
 }
 

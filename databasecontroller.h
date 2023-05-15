@@ -238,7 +238,7 @@ public:
     */
     bool deleteMedia(QSet<int> id, mediaType type);
     bool deleteTags(QSet<int> idTags);
-    //bool deleteTagsToMedia(QSet<int> idTags, mediaType type, )
+    bool deleteTagsFromMedia(int mediaId, mediaType type,  QSet<int> tags);
     /*!
     Извлекает всю таблицу тегов
     \return таблица тегов
